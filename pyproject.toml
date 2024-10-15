@@ -9,7 +9,7 @@ readme = "README.md"
 python = "^3.12"
 click = ">=8.1.7"
 httpx = ">=0.27.0"
-loguru = "^0.7.2"
+loguru = ">=0.7.2"
 
 [tool.poetry.scripts]
 cf-check-dns = "cf_check_dns.app:main"
@@ -27,26 +27,23 @@ line-length = 120
 line-length = 120
 target-version = "py310"
 lint.select = [
-    "E", # Pycodestyle errors
-    "F", # Pyflakes
-    "W", # Pywicked
-    "B", # Flake8-bugbear
-    "C4", # Flake8-comprehensions
-    "I", # Isort
-    "N", # Mcabe nested complexity
+    "E",   # Pycodestyle errors
+    "F",   # Pyflakes
+    "W",   # Pywicked
+    "B",   # Flake8-bugbear
+    "C4",  # Flake8-comprehensions
+    "I",   # Isort
+    "N",   # Mcabe nested complexity
     "PGH", # Flake8-pygments
     "PTH", # Flake8-pytest-helper
-    "Q", # Flake8-quotes
+    "Q",   # Flake8-quotes
     "RET", # Flake8-return
     "RUF", # Ruff-specific rules
     "SIM", # Flake8-simplify
-    "UP", # Flake8-pyupgrade
+    "UP",  # Flake8-pyupgrade
     "YTT", # Flake8-2020
 ]
-lint.ignore = [
-    "RET501",
-    "F541"
-]
+lint.ignore = ["RET501", "F541"]
 
 [build-system]
 requires = ["poetry-core"]

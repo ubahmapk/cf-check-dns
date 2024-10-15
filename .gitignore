@@ -151,3 +151,4 @@ cython_debug/
 
 # Zed
 .zed
+.python-version

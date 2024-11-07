@@ -1,6 +1,6 @@
 # Be sure to update the project folder used in
 # the exlusion sections of black and bandit.
-
+exclude: '^.*/(tests/|__version__.py)'
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0  # Use the ref you want to point at
@@ -36,7 +36,6 @@ repos:
         # https://pre-commit.com/#top_level-default_language_version
         language_version: python3.12
         types_or: [ python ]
-        exclude: '^fresh_start/__version__.py'
 
   # Bandit SAST
   # https://bandit.readthedocs.io/en/latest/index.html
@@ -44,4 +43,4 @@ repos:
     rev: '1.7.10' # Update me!
     hooks:
     - id: bandit
-      exclude: '^.*/tests/'
+      args: ["-c", ".bandit.yml"]

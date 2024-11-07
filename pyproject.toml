@@ -19,6 +19,7 @@ black = ">=24.4.0"
 vermin = ">=1.6.0"
 isort = ">=5.13.2"
 ruff = ">=0.6.9"
+pre-commit = "^4.0.1"
 
 [tool.black]
 line-length = 120

@@ -20,13 +20,27 @@ vermin = ">=1.6.0"
 isort = ">=5.13.2"
 ruff = ">=0.6.9"
 pre-commit = "^4.0.1"
+ipython = "^8.29.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.bandit]
+exclude_dirs = ["*/tests"]
+skips = ["B311", "B113"]
 
 [tool.black]
 line-length = 120
+exclude = "__version__.py"
+
+[tool.isort]
+profile = "black"
 
 [tool.ruff]
+exclude = ["*/tests/"]
 line-length = 120
-target-version = "py310"
+target-version = "py312"
 lint.select = [
     "E",   # Pycodestyle errors
     "F",   # Pyflakes
@@ -45,7 +59,3 @@ lint.select = [
     "YTT", # Flake8-2020
 ]
 lint.ignore = ["RET501", "F541"]
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"

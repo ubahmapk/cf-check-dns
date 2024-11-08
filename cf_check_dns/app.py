@@ -2,12 +2,12 @@ from sys import exit, stderr
 
 import click
 import httpx
+from __version__ import __version__
 from loguru import logger
 from pydantic import EmailStr, Field, ValidationError
 from pydantic_settings import BaseSettings
 
-__author__ = "jm@phyxt.net"
-__version__ = "0.5.0"
+__author__ = "ubahmapk@gmail.com"
 
 
 class ZoneNotFoundError(Exception):
@@ -65,6 +65,8 @@ def retrieve_cf_credentials() -> tuple[str, str]:
 def get_zone_id(client: httpx.Client, cf_zone: str) -> str:
     """Return the CF zone ID for a given Zone name."""
 
+    zone_id: str = ""
+
     try:
         logger.debug(f"In get_zone_id: {cf_zone=}")
         result: dict = client.get("/zones").json()["result"]
@@ -72,7 +74,7 @@ def get_zone_id(client: httpx.Client, cf_zone: str) -> str:
         raise ZoneNotFoundError(f"Unable to retrieve ZoneID for {cf_zone}\nError details: {exc}") from exc
 
     try:
-        zone_id: str = next(zone["id"] for zone in result if zone["name"] == cf_zone)
+        zone_id = next(zone["id"] for zone in result if zone["name"] == cf_zone)
     except StopIteration:
         click.secho(f'Zone "{cf_zone}" not found', fg="red", bold=True)
         click.echo()

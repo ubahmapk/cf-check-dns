@@ -2,6 +2,7 @@ from sys import exit, stderr
 
 import click
 import httpx
+import pandas as pd
 from loguru import logger
 from pydantic import EmailStr, Field, ValidationError
 from pydantic_settings import BaseSettings
@@ -120,11 +121,11 @@ def print_dns_records(dns_records: dict) -> None:
         print()
         return None
 
-    for record in dns_records:
-        print(f"Host:         {record.get('name', '')}")
-        print(f"Address:      {record.get('content', '')}")
-        print(f"Last Updated: {record.get('modified_on', '')}")
-        print()
+    # Print the DNS records in a tabular format
+    df: pd.DataFrame = pd.DataFrame.from_dict(dns_records)
+    column_names: list[str] = ["modified_on", "name", "content"]
+    column_headers: list[str] = ["Last Updated", "Host", "Address"]
+    print(df[column_names].to_string(index=False, header=column_headers, justify="right"))
 
     return None
 
@@ -133,6 +134,7 @@ def process_single_zone(cf_zone: str, client: httpx.Client) -> None:
     """Given a zone name, print all DNS records for that zone."""
 
     cf_zone_id: str = ""
+    dns_records: dict = {}
 
     with client as client:
         try:
@@ -141,7 +143,7 @@ def process_single_zone(cf_zone: str, client: httpx.Client) -> None:
         except ZoneNotFoundError:
             exit("Unable to retrieve Zone ID")
 
-        dns_records: dict = retrieve_dns_records(client, cf_zone_id)
+        dns_records = retrieve_dns_records(client, cf_zone_id)
 
     print_dns_records(dns_records)
 

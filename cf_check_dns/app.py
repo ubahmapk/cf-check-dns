@@ -3,6 +3,8 @@ from sys import exit, stderr
 import click
 import httpx
 from loguru import logger
+from pydantic import EmailStr, Field, ValidationError
+from pydantic_settings import BaseSettings
 
 __author__ = "jm@phyxt.net"
 __version__ = "0.5.0"
@@ -10,6 +12,11 @@ __version__ = "0.5.0"
 
 class ZoneNotFoundError(Exception):
     pass
+
+
+class Settings(BaseSettings):
+    cf_api_key: str = Field(pattern=r"^[a-zA-Z0-9_]*$")
+    cf_api_email: EmailStr
 
 
 def set_logging_level(verbosity: int) -> None:
@@ -31,6 +38,28 @@ def set_logging_level(verbosity: int) -> None:
     logger.add(stderr, level=log_level)
 
     return None
+
+
+def retrieve_cf_credentials() -> tuple[str, str]:
+    """Retrieve Cloudflare API credentials from environment variables"""
+
+    cf_api_key: str = ""
+    cf_api_email: str = ""
+
+    try:
+        settings = Settings()
+        cf_api_key = settings.cf_api_key
+        cf_api_email = settings.cf_api_email
+
+    except ValidationError:
+        message: str = "CloudFlare credentials are not set or are invalid.\n"
+        message += "Please set the CF_API_KEY and CF_API_EMAIL environment variables."
+        click.secho(message, fg="red", bold=True)
+        exit(500)
+
+    logger.debug("AWS credentials found in environment")
+
+    return cf_api_key, cf_api_email
 
 
 def get_zone_id(client: httpx.Client, cf_zone: str) -> str:
@@ -83,17 +112,15 @@ def print_dns_records(dns_records: dict) -> None:
 @click.command()
 @click.version_option(__version__, "-V", "--version")
 @click.help_option("-h", "--help")
-@click.option("--cf_api_key", required=True, help="Cloudflare API key", envvar="CF_API_KEY")
-@click.option("--cf_api_email", required=True, help="Cloudflare API email address", envvar="CF_API_EMAIL")
 @click.option("-z", "--zone", "cf_zone", required=True, help="Cloudflare zone")
 @click.option("-v", "--verbose", "verbosity", help="Repeat for extra visibility", count=True)
-def main(cf_api_key: str, cf_api_email: str, cf_zone: str, verbosity: int) -> None:
+def main(cf_zone: str, verbosity: int) -> None:
     """
     \b
     Print DNS records for a given Cloudflare zone.
 
     \b
-    Credentials should be passed via the two environment variables:
+    Credentials are accepted via the two environment variables:
 
     \b
     CF_API_KEY
@@ -101,6 +128,8 @@ def main(cf_api_key: str, cf_api_email: str, cf_zone: str, verbosity: int) -> No
     """
 
     set_logging_level(verbosity)
+
+    cf_api_key, cf_api_email = retrieve_cf_credentials()
 
     client_headers = {
         "X-Auth-Key": cf_api_key,

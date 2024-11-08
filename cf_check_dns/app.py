@@ -2,10 +2,11 @@ from sys import exit, stderr
 
 import click
 import httpx
-from __version__ import __version__
 from loguru import logger
 from pydantic import EmailStr, Field, ValidationError
 from pydantic_settings import BaseSettings
+
+from cf_check_dns.__version__ import __version__
 
 __author__ = "ubahmapk@gmail.com"
 
@@ -114,12 +115,14 @@ def print_dns_records(dns_records: dict) -> None:
 @click.command()
 @click.version_option(__version__, "-V", "--version")
 @click.help_option("-h", "--help")
-@click.option("-z", "--zone", "cf_zone", required=True, help="Cloudflare zone")
+@click.argument("cf_zone", type=str)
 @click.option("-v", "--verbose", "verbosity", help="Repeat for extra visibility", count=True)
 def main(cf_zone: str, verbosity: int) -> None:
     """
     \b
     Print DNS records for a given Cloudflare zone.
+
+    Usage: cf_check_dns <zone_name>
 
     \b
     Credentials are accepted via the two environment variables:

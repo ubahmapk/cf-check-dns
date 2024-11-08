@@ -63,6 +63,21 @@ def retrieve_cf_credentials() -> tuple[str, str]:
     return cf_api_key, cf_api_email
 
 
+def list_cf_zones(client: httpx.Client, cf_api_email: str) -> None:
+    """List all zones available to the user."""
+
+    try:
+        result: dict = client.get("/zones").json()["result"]
+    except httpx.HTTPError as exc:
+        raise ZoneNotFoundError(f"Unable to retrieve ZoneID") from exc
+
+    print(f"Available Zones for Cloudflare user {cf_api_email}:")
+    for zone in result:
+        print(f"\tZone: {zone['name']}")
+
+    return None
+
+
 def get_zone_id(client: httpx.Client, cf_zone: str) -> str:
     """Return the CF zone ID for a given Zone name."""
 
@@ -111,11 +126,32 @@ def print_dns_records(dns_records: dict) -> None:
         print(f"Last Updated: {record.get('modified_on', '')}")
         print()
 
+    return None
+
+
+def process_single_zone(cf_zone: str, client: httpx.Client) -> None:
+    """Given a zone name, print all DNS records for that zone."""
+
+    cf_zone_id: str = ""
+
+    with client as client:
+        try:
+            cf_zone_id = get_zone_id(client, cf_zone)
+            logger.debug(f"{cf_zone_id=}")
+        except ZoneNotFoundError:
+            exit("Unable to retrieve Zone ID")
+
+        dns_records: dict = retrieve_dns_records(client, cf_zone_id)
+
+    print_dns_records(dns_records)
+
+    return None
+
 
 @click.command()
 @click.version_option(__version__, "-V", "--version")
 @click.help_option("-h", "--help")
-@click.argument("cf_zone", type=str)
+@click.argument("cf_zone", type=str, default="")
 @click.option("-v", "--verbose", "verbosity", help="Repeat for extra visibility", count=True)
 def main(cf_zone: str, verbosity: int) -> None:
     """
@@ -123,6 +159,8 @@ def main(cf_zone: str, verbosity: int) -> None:
     Print DNS records for a given Cloudflare zone.
 
     Usage: cf_check_dns <zone_name>
+
+    If no zone name is provided, a list of zones available to the user will be displayed.
 
     \b
     Credentials are accepted via the two environment variables:
@@ -144,15 +182,8 @@ def main(cf_zone: str, verbosity: int) -> None:
 
     client = httpx.Client(base_url="https://api.cloudflare.com/client/v4", headers=client_headers)
 
-    cf_zone_id: str = ""
+    if not cf_zone:
+        list_cf_zones(client, cf_api_email)
+        exit()
 
-    with client as client:
-        try:
-            cf_zone_id = get_zone_id(client, cf_zone)
-            logger.debug(f"{cf_zone_id=}")
-        except ZoneNotFoundError:
-            exit("Unable to retrieve Zone ID")
-
-        dns_records: dict = retrieve_dns_records(client, cf_zone_id)
-
-    print_dns_records(dns_records)
+    process_single_zone(cf_zone, client)

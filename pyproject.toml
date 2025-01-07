@@ -1,64 +1,33 @@
-[tool.poetry]
+[project]
 name = "cf-check-dns"
-version = "1.0.0"
+version = "0.5.1"
 description = "A Python utility to check DNS records for a domain hosted in Cloudflare"
-authors = ["Jon Mark Allen <ubahmapk@gmail.com>"]
 readme = "README.md"
+authors = [
+    { name = "Jon Mark Allen", email = "ubahmapk@proton.me" }
+]
+license = { file = "LICENSE" }
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "loguru>=0.7.3",
+    "pandas>=2.2.3",
+    "pydantic[email]>=2.10.4",
+    "pydantic-settings>=2.7.1",
+    "typer>=0.15.1",
+]
 
-[tool.poetry.dependencies]
-python = "^3.12"
-click = ">=8.1.7"
-httpx = ">=0.27.0"
-loguru = ">=0.7.2"
-pydantic-settings = ">=2.6.1"
-pydantic = {extras = ["email"], version = ">=2.9.2"}
-pandas = "^2.2.3"
+[dependency-groups]
+dev = [
+    "hatchling>=1.27.0",
+    "ipython>=8.31.0",
+    "pre-commit>=4.0.1",
+    "vermin>=1.6.0",
+]
 
-[tool.poetry.scripts]
-cf-check-dns = "cf_check_dns.app:main"
-
-[tool.poetry.group.dev.dependencies]
-black = ">=24.4.0"
-vermin = ">=1.6.0"
-isort = ">=5.13.2"
-ruff = ">=0.6.9"
-pre-commit = "^4.0.1"
-ipython = "^8.29.0"
+[project.scripts]
+cf-check-dns = "cf_check_dns.app:app"
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.bandit]
-exclude_dirs = ["*/tests"]
-skips = ["B311", "B113"]
-
-[tool.black]
-line-length = 120
-exclude = "__version__.py"
-
-[tool.isort]
-profile = "black"
-
-[tool.ruff]
-exclude = ["*/tests/"]
-line-length = 120
-target-version = "py312"
-lint.select = [
-    "E",   # Pycodestyle errors
-    "F",   # Pyflakes
-    "W",   # Pywicked
-    "B",   # Flake8-bugbear
-    "C4",  # Flake8-comprehensions
-    "I",   # Isort
-    "N",   # Mcabe nested complexity
-    "PGH", # Flake8-pygments
-    "PTH", # Flake8-pytest-helper
-    "Q",   # Flake8-quotes
-    "RET", # Flake8-return
-    "RUF", # Ruff-specific rules
-    "SIM", # Flake8-simplify
-    "UP",  # Flake8-pyupgrade
-    "YTT", # Flake8-2020
-]
-lint.ignore = ["RET501", "F541"]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

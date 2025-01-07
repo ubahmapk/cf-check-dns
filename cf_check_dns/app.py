@@ -1,11 +1,13 @@
 from sys import exit, stderr
+from typing import Annotated
 
-import click
 import httpx
 import pandas as pd
+import typer
 from loguru import logger
 from pydantic import EmailStr, Field, ValidationError
 from pydantic_settings import BaseSettings
+from rich import print as rprint
 
 from cf_check_dns.__version__ import __version__
 
@@ -56,8 +58,8 @@ def retrieve_cf_credentials() -> tuple[str, str]:
     except ValidationError:
         message: str = "CloudFlare credentials are not set or are invalid.\n"
         message += "Please set the CF_API_KEY and CF_API_EMAIL environment variables."
-        click.secho(message, fg="red", bold=True)
-        exit(500)
+        rprint(f"[red bold]{message}[/red bold]")
+        raise typer.Abort() from None
 
     logger.debug("AWS credentials found in environment")
 
@@ -93,9 +95,7 @@ def get_zone_id(client: httpx.Client, cf_zone: str) -> str:
     try:
         zone_id = next(zone["id"] for zone in result if zone["name"] == cf_zone)
     except StopIteration:
-        click.secho(f'Zone "{cf_zone}" not found', fg="red", bold=True)
-        click.echo()
-        exit(404)
+        raise typer.BadParameter(f"Zone {cf_zone} not found") from None
 
     logger.debug(f"Returning {zone_id=}")
     return zone_id
@@ -150,12 +150,34 @@ def process_single_zone(cf_zone: str, client: httpx.Client) -> None:
     return None
 
 
-@click.command()
-@click.version_option(__version__, "-V", "--version")
-@click.help_option("-h", "--help")
-@click.argument("cf_zone", type=str, default="")
-@click.option("-v", "--verbose", "verbosity", help="Repeat for extra visibility", count=True)
-def main(cf_zone: str, verbosity: int) -> None:
+def version_callback(value: bool) -> None:
+    if value:
+        print(f"cf-check-dns version {__version__}")
+
+        raise typer.Exit(0)
+
+    return None
+
+
+app = typer.Typer(add_completion=False, context_settings={"help_option_names": ["-h", "--help"]})
+
+
+@app.command()
+def main(
+    cf_zone: Annotated[str, typer.Argument(help="The domain name")],
+    verbosity: Annotated[int, typer.Option("--verbose", "-v", count=True, help="Repeat for extra verbosity")] = 0,
+    version: Annotated[
+        bool,
+        typer.Option(
+            "--version",
+            "-V",
+            callback=version_callback,
+            is_eager=True,
+            show_default=False,
+            help="Show the version and exit.",
+        ),
+    ] = False,
+) -> None:
     """
     \b
     Print DNS records for a given Cloudflare zone.

@@ -125,7 +125,7 @@ def print_dns_records(dns_records: dict) -> None:
     df: pd.DataFrame = pd.DataFrame.from_dict(dns_records)
     column_names: list[str] = ["modified_on", "name", "content"]
     column_headers: list[str] = ["Last Updated", "Host", "Address"]
-    print(df[column_names].to_string(index=False, header=column_headers, justify="right"))
+    print(df[column_names].to_string(index=False, header=column_headers, justify="right"))  # type: ignore [reportArgumentType, reportCallIssue]
 
     return None
 

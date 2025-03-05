@@ -51,7 +51,7 @@ def retrieve_cf_credentials() -> tuple[str, str]:
     cf_api_email: str = ""
 
     try:
-        settings = Settings()
+        settings = Settings()  # type: ignore [reportCallIssue]
         cf_api_key = settings.cf_api_key
         cf_api_email = settings.cf_api_email
 

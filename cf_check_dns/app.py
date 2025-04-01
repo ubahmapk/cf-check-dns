@@ -72,7 +72,7 @@ def list_cf_zones(client: httpx.Client, cf_api_email: str) -> None:
     try:
         result: dict = client.get("/zones").json()["result"]
     except httpx.HTTPError as exc:
-        raise ZoneNotFoundError(f"Unable to retrieve ZoneID") from exc
+        raise ZoneNotFoundError("Unable to retrieve ZoneID") from exc
 
     print(f"Available Zones for Cloudflare user {cf_api_email}:")
     for zone in result:

@@ -23,6 +23,7 @@ dev = [
     "ipython>=8.31.0",
     "pre-commit>=4.0.1",
     "pyright>=1.1.396",
+    "pytest>=8.4.1",
     "ruff>=0.9.9",
     "vermin>=1.6.0",
 ]

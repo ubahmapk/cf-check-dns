@@ -47,6 +47,8 @@ def set_logging_level(verbosity: int) -> None:
 def retrieve_cf_credentials() -> tuple[str, str]:
     """Retrieve Cloudflare API credentials from environment variables"""
 
+    # TODO: This is a good project to convert to Dynaconf for testing
+
     cf_api_key: str = ""
     cf_api_email: str = ""
 
